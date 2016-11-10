@@ -1,4 +1,4 @@
-(defproject uberconf "0.1.0-SNAPSHOT"
+(defproject jmorton/uberconf "0.1.0-SNAPSHOT"
   :description "Configuration made Über."
   :url "http://github.com/jmorton/uberconf"
   :license {:name "Eclipse Public License"

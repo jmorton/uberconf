@@ -7,4 +7,7 @@
                  [org.clojure/tools.cli "0.3.5"]
                  [clojure-ini "0.0.2"]
                  [prismatic/schema "1.1.3"]
-                 [camel-snake-kebab "0.4.0"]])
+                 [camel-snake-kebab "0.4.0"]]
+  :profiles {:test {:jvm-opts ["-DFOO=env-test-foo-val"
+                               "-DBAR=env-test-bar-val"
+                               "-DBAZ=env-test-baz-val"]}})

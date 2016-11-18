@@ -28,17 +28,11 @@
       (is (= "edn-dev-foo-val" (get-in cfg [:dev :foo]))))))
 
 (deftest env-test
-  (testing "reading env"
-    (let [cfg (env->cfg)]
-      (is (= "env-test-foo-val" (cfg :foo)))))
   (testing "reading a few thing from env"
-    (let [cfg (env->cfg :foo :bar :baz)]
-      (is (= "env-test-foo-val" (cfg :foo)))
-      (is (= "env-test-bar-val" (cfg :bar)))))
-  (testing "reading a few things from env using strings"
-    (let [cfg (env->cfg ["FOO" "BAR" "BAZ"])]
-      (is (= "env-test-foo-val" (cfg :foo)))
-      (is (= "env-test-bar-val" (cfg :bar))))))
+    (let [cfg (env->cfg {:prefix "foo."})]
+      (is (= "1" (get-in cfg [:bar :x])))
+      (is (= "2" (get-in cfg [:bar :y])))
+      (is (= "3" (get-in cfg [:baz :x]))))))
 
 (deftest cli-test
   (testing "reading command line opts"
@@ -57,11 +51,11 @@
       (is (= ["db1" "db2" "db3"] (:hosts fix))))))
 
 (deftest schema-test
-  (testing "config is a keyword,string map"
+  (testing "config is a keyword, string map"
     ;; Covering the case where environment variable
     ;; capitalization comes into play. I think it's
     ;; okay to essentially ignore case differences.
-    (let [cfg (build-cfg {:env ["FOO" "Bar" "baz"]
+    (let [cfg (build-cfg {:env {:prefix "foo."}
                           :ini "test/conf/test.ini"
                           :edn "test/conf/test.edn"})]
       (is (check-cfg cfg)))))

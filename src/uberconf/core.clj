@@ -31,16 +31,36 @@
   (transform-keys ->kebab-case-keyword
                   (edn/read-string (slurp path))))
 
+(defn key-prefix? [[k v] prefix]
+  (clojure.string/starts-with? k prefix))
+
+(defn key-change [[k v] prefix]
+  [(clojure.string/replace-first k (re-pattern prefix) "") v])
+
+(defn key-split [[k v] separator]
+  [(clojure.string/split k (re-pattern separator)) v])
+
+(defn deep-map
+  ([config prefix separator]
+   (->> config
+        (filter #(key-prefix? % prefix))
+        (map    #(key-change % prefix))
+        (map    #(key-split % separator))
+        (into {})
+        (reduce-kv #(assoc-in %1 %2 %3) {})
+        (transform-keys ->kebab-case-keyword)))
+  ([config]
+   (deep-map config "" #"\.")))
+
 (defn env->cfg
   "Get environment, including java properties, as map."
-  ([]
+  ([{:keys [prefix separator]
+     :or   {prefix "" separator #"\."}
+     :as   opts}]
    (let [props (System/getProperties)
          env (into {} (System/getenv))
          env+props (merge env props)]
-     (transform-keys ->kebab-case-keyword env+props)))
-  ([& more]
-   (let [ks (map ->kebab-case-keyword (flatten (vector more)))]
-     (select-keys (env->cfg) ks))))
+     (deep-map env+props prefix separator))))
 
 (defn cli->cfg
   "Get command line arguments as map."
@@ -74,7 +94,7 @@
 
 (def Config
   "A schema for config maps"
-  {schema/Keyword schema/Str})
+  {schema/Keyword schema/Any})
 
 (defn check-cfg
   "Validate cfg against schema."
